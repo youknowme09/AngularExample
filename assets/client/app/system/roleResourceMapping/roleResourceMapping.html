@@ -1,0 +1,218 @@
+<style>
+  .mappingCheckbox {
+    width: 25px;
+    height: 25px;
+  }
+</style>
+
+<h1>編輯RoleResourceMapping</h1>
+
+<table class="table table-hover table-bordered" ng-if="afterDataLoaded">
+  <thead>
+  <tr>
+    <td rowspan="2" colspan="2">
+
+
+    </td>
+    <td ng-if="roleList.length == 0" colspan="2">
+      <h2>Application Role <button class="pull-right btn btn-primary" data-toggle="modal" data-target="#editableRoleModal"
+                                   ng-click="openRoleModal('ADD', {})">Add Role
+      </button> </h2>
+    </td>
+    <td ng-if="roleList.length > 0" colspan="{{roleList.length}}">
+      <h2>Application Role <button class="pull-right btn btn-primary" data-toggle="modal" data-target="#editableRoleModal"
+              ng-click="openRoleModal('ADD', {})">Add Role
+      </button></h2>
+    </td>
+  </tr>
+  <tr>
+    <td ng-repeat="roleItem in roleList" style="white-space: nowrap;">
+        <span> <strong> {{roleItem.name}} </strong>
+            <button href="javascript:void(0);" ng-click="openRoleModal('UPDATE', roleItem)" data-toggle="modal"
+                    data-target="#editableRoleModal">
+              <i class="glyphicon glyphicon-pencil"></i></button>
+            <button href="javascript:void(0);" ng-click="openRoleModal('DELETE', roleItem)" data-toggle="modal"
+                    data-target="#editableRoleModal">
+              <i class="glyphicon glyphicon-remove"></i></button>
+        </span>
+    </td>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td rowspan="{{resourceList.length+1}}" width="30px">  <h2>Resources</h2>
+    <button class="btn btn-success" data-toggle="modal" data-target="#editableResourceModal"
+            ng-click="openResourceModal('ADD', {})">Add Resource
+    </button>
+    </td>
+  </tr>
+
+  <tr ng-repeat="resourceItem in resourceList">
+    <td>
+      <div ng-if="!resourceItem.account">
+        <p>
+            <span style="color: forestgreen; font-weight: bold; ">
+                        {{resourceItem.type}}
+            </span>
+            <span class="pull-right">
+              <a href="javascript: void(0);" data-toggle="modal" data-target="#editableResourceModal"
+                 ng-click="openResourceModal('UPDATE', resourceItem)">
+                <i class="glyphicon glyphicon-pencil"></i> </a>
+              <a href="javascript: void(0);" data-toggle="modal" data-target="#editableResourceModal"
+                 ng-click="openResourceModal('DELETE', resourceItem)">
+                <i class="glyphicon glyphicon-remove"></i> </a>
+            </span>
+
+        </p>
+
+        <p style=" color: forestgreen">{{resourceItem.name}} </p>
+
+        <p>{{resourceItem.url}} </p>
+      </div>
+      <div ng-if="resourceItem.account">
+        <p style="color: orangered; font-weight: bold; ">{{resourceItem.type}}</p>
+
+        <p style="color: orangered; font-weight: 500; "> {{resourceItem.name}}</p>
+
+        <p>Acct: {{resourceItem.account}}</p>
+      </div>
+    </td>
+    <td ng-repeat="roleItem in roleList track by $index">
+      <input class="mappingCheckbox" type="checkbox" ng-if="roleItem.name!=''" ng-model="rrm.isSelect"
+             ng-change="change(rrm)"
+             ng-init="rrm = hasMapping(roleItem.id, resourceItem.id);">
+    </td>
+  </tr>
+
+  </tbody>
+</table>
+
+
+<div class="modal fade" tabindex="-1" id="editableResourceModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+          aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" ng-switch on="editResourceState">
+          <span ng-switch-when="ADD">增加一個新的資源</span>
+          <span ng-switch-when="UPDATE">更新資源</span>
+          <span ng-switch-when="DELETE">刪除資源</span>
+        </h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" role="form">
+          <div class="form-group" ng-if="editResourceState != 'ADD' ">
+            <label class="col-sm-4 control-label">Id</label>
+
+            <div class="col-sm-8">
+              <div style="padding-top: 7px;">{{resource.id}}</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Type * </label>
+
+            <div class="col-sm-8">
+              <select class="form-control" ng-model="resource.type" ng-disabled="editResourceState != 'ADD'">
+                <option value="page">Page</option>
+                <option value="processRole">ProcessRole</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Url</label>
+
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="resource.url" placeholder="url">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Name</label>
+
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="resource.name" placeholder="name">
+            </div>
+          </div>
+
+          <div class="form-group" ng-if="resource.type == 'processRole' ">
+            <label class="col-sm-4 control-label">Account</label>
+
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="resource.account" placeholder="account">
+            </div>
+          </div>
+
+          <div class="form-group" ng-if="resource.type == 'processRole' ">
+            <label class="col-sm-4 control-label">Password</label>
+
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="resource.password" placeholder="password">
+            </div>
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer" ng-switch on="editResourceState">
+        <button data-dismiss="modal" class="btn btn-primary" ng-switch-when="ADD" ng-click="addNewResourceItem()">確定
+        </button>
+        <button data-dismiss="modal" class="btn btn-info" ng-switch-when="UPDATE" ng-click="updateResourceItem()">更新
+        </button>
+        <button data-dismiss="modal" class="btn btn-danger" ng-switch-when="DELETE" ng-click="deleteResourceItem()">刪除
+        </button>
+        <button data-dismiss="modal" class="btn btn-default" ng-switch-default data-dismiss="modal"> 結束　</button>
+        <button data-dismiss="modal" class="btn btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" id="editableRoleModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+          aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" ng-switch on="editRoleState">
+          <span ng-switch-when="ADD">增加一個新的角色</span>
+          <span ng-switch-when="UPDATE">更新角色</span>
+          <span ng-switch-when="DELETE">刪除角色</span>
+        </h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="col-sm-4 control-label"> 角色名稱 </label>
+
+            <div class="col-sm-8">
+              <input type="text" class="form-control" ng-model="role.name" placeholder="角色名稱">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label"> 角色描述</label>
+
+            <div class="col-sm-8">
+              <textarea type="text" class="form-control" ng-model="role.description" placeholder="角色描述"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" ng-switch="editRoleState">
+        <button class="btn btn-primary" ng-switch-when="ADD" ng-click="addNewRoleItem()" data-dismiss="modal">確定
+        </button>
+
+        <button class="btn btn-info" ng-switch-when="UPDATE" ng-click="updateRoleItem()" data-dismiss="modal">更新
+        </button>
+
+        <button class="btn btn-danger" ng-switch-when="DELETE" ng-click="deleteRoleItem()" data-dismiss="modal">刪除
+        </button>
+
+        <button class="btn btn-default" ng-switch-default data-dismiss="modal" data-dismiss="modal"> 結束　</button>
+        <button class="btn btn-default" data-dismiss="modal" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

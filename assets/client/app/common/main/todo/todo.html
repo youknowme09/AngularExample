@@ -1,0 +1,23 @@
+
+<h1>This is todo page</h1>
+
+
+<table class="table">
+
+  <thead>
+    <tr>
+      <th>href/id</th>
+      <th>message</th>
+      <th>action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr ng-repeat="todo in todoList">
+      <td>{{todo._links.self.href}}</td>
+      <td>{{todo.message}}</td>
+      <td><button class="button " ng-click="clickBtn()">DELETE</button></td>
+    </tr>
+  </tbody>
+
+</table>
